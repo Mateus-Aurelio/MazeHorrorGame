@@ -16686,7 +16686,7 @@ GameObject:
   - component: {fileID: 814033258}
   - component: {fileID: 814033259}
   m_Layer: 0
-  m_Name: LIGHTING
+  m_Name: LIGHTING FOR EDITING
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18547,6 +18547,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseSensitivity: 20
   playerBody: {fileID: 1394144480}
+  xRotation: 0
 --- !u!1001 &983643213
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21606,8 +21607,9 @@ MonoBehaviour:
   groundCheck: {fileID: 1657581032}
   groundDistance: 0.4
   groundMask:
-    serializedVersion: 2
     m_Bits: 64
+  velocity: {x: 0, y: 0, z: 0}
+  isGrounded: 0
 --- !u!143 &1394144482
 CharacterController:
   m_ObjectHideFlags: 0

@@ -38,8 +38,8 @@ public class Ending : MonoBehaviour
         //music2.Pause();
         //killSound.Play();
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        Camera.main.GetComponent<mouse>().enabled = false;
-        player.GetComponent<movement>().enabled = false;
+        Camera.main.GetComponent<PlayerLook>().enabled = false;
+        player.GetComponent<PlayerMove>().enabled = false;
         //Camera.main.transform.LookAt(transform.position);
         Invoke("Load", 1.2f);
     }

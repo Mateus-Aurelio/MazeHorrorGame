@@ -43,8 +43,8 @@ public class KillPlayer : MonoBehaviour
             Camera.main.transform.LookAt(transform.position);
             //Camera.main.transform.Translate(Vector3.back * 0.1f);
             monster.KilledPlayer();
-            Camera.main.GetComponent<mouse>().enabled = false;
-            other.GetComponent<movement>().enabled = false;
+            Camera.main.GetComponent<PlayerLook>().enabled = false;
+            other.GetComponent<PlayerMove>().enabled = false;
             Invoke("Restart", 5.5f);
         }
     }
