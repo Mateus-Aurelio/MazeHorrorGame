@@ -11,6 +11,7 @@ public class Ending : MonoBehaviour
     [SerializeField] GameObject killPlayer;
     [SerializeField] private AudioSource music1;
     [SerializeField] private AudioSource music2;
+    [SerializeField] private Transform endLookPos;
 
     private bool GameOver;
 
@@ -24,6 +25,10 @@ public class Ending : MonoBehaviour
         if (GameOver)
         {
             fade.color = new Color(fade.color.r, fade.color.g, fade.color.b, fade.color.a + Time.deltaTime * fadeSpeed);
+
+            Quaternion targetRotation = Quaternion.LookRotation(endLookPos.transform.position - Camera.main.transform.position);
+            Camera.main.transform.rotation = Quaternion.Slerp(Camera.main.transform.rotation, targetRotation, 1 * Time.deltaTime);
+
             //GameObject.FindGameObjectWithTag("Player");
             music1.volume = Mathf.Lerp(music1.volume, 0.0f, 0.01f);
             music2.volume = Mathf.Lerp(music2.volume, 0.0f, 0.01f);

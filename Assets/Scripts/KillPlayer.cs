@@ -38,13 +38,17 @@ public class KillPlayer : MonoBehaviour
             music1.Pause();
             music2.Pause();
             killSound.Play();
-            //Camera.main.transform.Translate(Vector3.up * 0.1f);
+
+            Vector3 newCamPos = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y + 0.75f, Camera.main.transform.position.z);
+            Camera.main.transform.position = newCamPos;
             monster.transform.LookAt(new Vector3(other.transform.position.x, monster.transform.position.y, other.transform.position.z));
-            Camera.main.transform.LookAt(transform.position);
+            //Camera.main.transform.position = transform.position + Vector3.left * 3;
+            Camera.main.transform.LookAt(new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z));
             //Camera.main.transform.Translate(Vector3.back * 0.1f);
+
             monster.KilledPlayer();
             Camera.main.GetComponent<PlayerLook>().enabled = false;
-            other.GetComponent<PlayerMove>().enabled = false;
+            other.GetComponent<PlayerMove>().PlayerDied();
             Invoke("Restart", 5.5f);
         }
     }

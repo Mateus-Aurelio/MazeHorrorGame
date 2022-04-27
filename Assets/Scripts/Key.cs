@@ -30,6 +30,11 @@ public class Key : MonoBehaviour
 
     private void CollectKey()
     {
+        Monster monster = GameObject.FindGameObjectWithTag("Monster").GetComponent<Monster>();
+        if (Vector3.Distance(monster.transform.position, transform.position) <= 20)
+        {
+            monster.HeardNoise(transform.position);
+        }
         Lock[] locks = GameObject.FindObjectsOfType<Lock>();
         foreach (Lock l in locks)
         {

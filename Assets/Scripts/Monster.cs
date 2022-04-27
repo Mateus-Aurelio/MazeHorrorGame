@@ -6,7 +6,10 @@ using UnityEngine.SceneManagement;
 
 public class Monster : MonoBehaviour
 {
-    [SerializeField] private List<Transform> walkPoints = new List<Transform>();
+    private List<Transform> walkPoints = new List<Transform>();
+    [SerializeField] private List<Transform> walkPointsTop = new List<Transform>();
+    [SerializeField] private List<Transform> walkPointsBot = new List<Transform>();
+    [SerializeField] private List<Transform> walkPointsSide = new List<Transform>();
     private int pointsIndex;
 
     private enum MonsterStates { Walking, Chasing };
@@ -18,25 +21,28 @@ public class Monster : MonoBehaviour
 
     private float timeSinceSeenPlayer;
     [SerializeField] private float maxBlindChaseTime;
-    private float seesPlayerWalkingTime = 0;
+    //private float seesPlayerWalkingTime = 0;
 
     [SerializeField] private float walkSpeed;
     [SerializeField] private float chaseSpeed;
 
-    [SerializeField] private float fieldOfView;
-    private float realFieldOfView;
-    [SerializeField] private Transform enemyEyes;
+    //[SerializeField] private float fieldOfView;
+    //private float realFieldOfView;
+    //[SerializeField] private Transform enemyEyes;
 
-    [SerializeField] private float roarWaitTime;
-    private float timeSinceRoar = 100;
+    //[SerializeField] private float roarWaitTime;
+    //private float timeSinceRoar = 100;
+    private float timeSinceGrowl;
     [SerializeField] private float lowTensionTime;
     [SerializeField] private float highTensionTime = 45;
+    private float stuckTimer;
     private float chaseTime;
 
     [SerializeField] private AudioSource roar;
     [SerializeField] private AudioSource footstep;
-    [SerializeField] private AudioSource suspenseMusic;
-    [SerializeField] private AudioSource chaseMusic;
+    [SerializeField] private AudioSource growl;
+    //[SerializeField] private AudioSource suspenseMusic;
+    //[SerializeField] private AudioSource chaseMusic;
 
     //[SerializeField] private Collider killPlayer;
 
@@ -46,21 +52,24 @@ public class Monster : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
         anim.SetInteger("State", 0);
-        realFieldOfView = fieldOfView;
-
-        /*GameObject[] points = GameObject.FindGameObjectsWithTag("walkPoint");
-        foreach (GameObject g in points)
-        {
-            walkPoints.Add(g.transform);
-        }
-        pointsIndex = Random.Range(0, walkPoints.Count);*/
+        //realFieldOfView = fieldOfView;
+        InitWalkPoints();
         pointsIndex = 0;
+    }
+
+    private void InitWalkPoints()
+    {
+        walkPoints = new List<Transform>(walkPointsTop.Count + walkPointsBot.Count + walkPointsSide.Count);
+        walkPointsBot.ForEach(point => walkPoints.Add(point));
+        walkPointsTop.ForEach(point => walkPoints.Add(point));
+        walkPointsSide.ForEach(point => walkPoints.Add(point));
     }
 
     void Update()
     {
         timeSinceSeenPlayer += Time.deltaTime;
-        timeSinceRoar += Time.deltaTime;
+        //timeSinceRoar += Time.deltaTime;
+        timeSinceGrowl += Time.deltaTime;
         switch (state)
         {
             case MonsterStates.Walking:
@@ -70,13 +79,17 @@ public class Monster : MonoBehaviour
                 ChasingUpdate();
                 break;
         }
+        /*if (agent.)
+        {
+            stuckTimer += Time.deltaTime;
+        }*/
     }
 
     private void WalkingUpdate()
     {
-        ChaseMusic(false);
+        //ChaseMusic(false);
         chaseTime = 0;
-        realFieldOfView = fieldOfView;
+        //realFieldOfView = fieldOfView;
         agent.speed = walkSpeed;
         if (Vector3.Distance(transform.position, agent.destination) <= 0.5f)
         {
@@ -89,7 +102,7 @@ public class Monster : MonoBehaviour
                 NextPointNearPlayer();
             }
         }
-        if (SeesPlayer())
+        /*if (SeesPlayer())
         {
             seesPlayerWalkingTime += Time.deltaTime;
             if (seesPlayerWalkingTime > 0.15f)
@@ -112,7 +125,7 @@ public class Monster : MonoBehaviour
         else
         {
             seesPlayerWalkingTime = 0;
-        }
+        }*/
     }
 
     private void ChaseSpeed()
@@ -134,15 +147,15 @@ public class Monster : MonoBehaviour
     private void ChasingUpdate()
     {
         chaseTime += Time.deltaTime;
-        ChaseMusic(true);
-        realFieldOfView = 120f;
-        if (SeesPlayer())
+        //ChaseMusic(true);
+        //realFieldOfView = 120f;
+        /*if (SeesPlayer())
         {
             timeSinceSeenPlayer = 0;
             agent.SetDestination(player.position);
-            //Debug.Log("Chasing player!");
+            Debug.Log("Chasing player!");
         }
-        else if (timeSinceSeenPlayer > maxBlindChaseTime)
+        else */if (timeSinceSeenPlayer > maxBlindChaseTime)
         {
             state = MonsterStates.Walking;
             anim.SetInteger("State", 0);
@@ -184,7 +197,8 @@ public class Monster : MonoBehaviour
         Transform newPoint = walkPoints[0];
         foreach (Transform t in walkPoints)
         {
-            if (Vector3.Distance(player.position, t.position) < Vector3.Distance(player.position, newPoint.position))
+            if (Vector3.Distance(player.position, t.position) < Vector3.Distance(player.position, newPoint.position)
+                && t != walkPoints[pointsIndex])
             {
                 newPoint = t;
             }
@@ -194,8 +208,9 @@ public class Monster : MonoBehaviour
         //Debug.Log("NextPointNearPlayer() : " + walkPoints[pointsIndex].gameObject.name);
     }
 
-    private bool SeesPlayer()
+    /*private bool SeesPlayer()
     {
+        return false;
         return PlayerWithinAngle() && PlayerUnobstructedInVision();
     }
 
@@ -216,9 +231,24 @@ public class Monster : MonoBehaviour
             }
         }
         return false;
+    }*/
+
+    public void HeardNoise(Vector3 location)
+    {
+        timeSinceSeenPlayer = 0;
+        state = MonsterStates.Chasing;
+        agent.SetDestination(location); 
+        anim.SetInteger("State", 1);
+        ChaseSpeed();
+        //Debug.Log("Heard player!");
+        if (timeSinceGrowl > 4)
+        {
+            timeSinceGrowl = 0;
+            growl.Play();
+        }
     }
 
-    private void ChaseMusic(bool given)
+    /*private void ChaseMusic(bool given)
     {
         if (given)
         {
@@ -230,7 +260,7 @@ public class Monster : MonoBehaviour
             suspenseMusic.volume = Mathf.Lerp(suspenseMusic.volume, 0.1f, 0.001f);
             chaseMusic.volume = Mathf.Lerp(chaseMusic.volume, 0.0f, 0.001f);
         }
-    }
+    }*/
 
     public void KilledPlayer()
     {
@@ -240,17 +270,7 @@ public class Monster : MonoBehaviour
         agent.SetDestination(transform.position);
         agent.enabled = false;
         roar.volume = 0;
-        Invoke("Dead1", 0.01f);
-        Invoke("Dead2", 0.05f);
-    }
 
-    private void Dead1()
-    {
-        anim.SetInteger("State", 3);
-    }
-
-    private void Dead2()
-    {
         anim.SetInteger("State", 3);
         this.enabled = false;
     }

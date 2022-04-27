@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class PlayerLook : MonoBehaviour
 {
-    public float mouseSensitivity = 10f;
-    public Transform playerBody;
-    float xRotation = 0f;
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private Transform playerBody;
+    private float xRotation = 0f;
+    [SerializeField] Transform flashlight;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        //mouseSensitivity = 300;
     }
 
-    // Update is called once per frame
     void Update()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
@@ -24,5 +25,22 @@ public class PlayerLook : MonoBehaviour
 
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         playerBody.Rotate(Vector3.up * mouseX);
+
+        float moveMult = 0.5f;
+        if (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0)
+        {
+            moveMult = 1.0f;
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                moveMult = 2.25f;
+            }
+        }
+
+        flashlight.localRotation = Quaternion.Lerp(
+            flashlight.localRotation,
+            Quaternion.Euler(
+            Mathf.Sin(Time.time * 3) * moveMult - 1.5f, // up down
+            Mathf.Sin(Time.time * 1.5f ) * moveMult, // left right
+            0), 0.03f);
     }
 }
