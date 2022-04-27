@@ -34,7 +34,7 @@ public class Monster : MonoBehaviour
     //private float timeSinceRoar = 100;
     private float timeSinceGrowl;
     [SerializeField] private float lowTensionTime;
-    [SerializeField] private float highTensionTime = 45;
+    [SerializeField] private float highTensionTime;
     private float stuckTimer;
     private float chaseTime;
 
@@ -99,7 +99,8 @@ public class Monster : MonoBehaviour
             }
             else
             {
-                NextPointNearPlayer();
+                //NextPointNearPlayer();
+                NextPointSameSectionPlayer();
             }
         }
         /*if (SeesPlayer())
@@ -155,34 +156,29 @@ public class Monster : MonoBehaviour
             agent.SetDestination(player.position);
             Debug.Log("Chasing player!");
         }
-        else */if (timeSinceSeenPlayer > maxBlindChaseTime)
+        else */
+        //if (timeSinceSeenPlayer > maxBlindChaseTime)
+        if (chaseTime > maxBlindChaseTime)
         {
             state = MonsterStates.Walking;
             anim.SetInteger("State", 0);
-            if (chaseTime > highTensionTime)
+            if (timeSinceSeenPlayer > highTensionTime)
             {
-                NextPointRandom();
+                //NextPointRandom();
+                NextPointDifferentSectionPlayer();
             }
             else
             {
-                NextPointNearPlayer();
+                //NextPointNearPlayer();
+                NextPointSameSectionPlayer();
             }
         }
         else if (Vector3.Distance(transform.position, agent.destination) < 0.5f)
         {
-            NextPointNearPlayer();
+            //NextPointNearPlayer();
+            NextPointSameSectionPlayer();
+            maxBlindChaseTime += 5;
         }
-    }
-
-    private void NextPoint()
-    {
-        pointsIndex++;
-        if (pointsIndex >= walkPoints.Count)
-        {
-            pointsIndex = 0;
-        }
-        agent.SetDestination(walkPoints[pointsIndex].position);
-        //Debug.Log("NextPoint() : " + walkPoints[pointsIndex].gameObject.name);
     }
 
     private void NextPointRandom()
@@ -192,13 +188,59 @@ public class Monster : MonoBehaviour
         //Debug.Log("NextPointRandom() : " + walkPoints[pointsIndex].gameObject.name);
     }
 
+    private void NextPointSameSectionPlayer()
+    {
+        switch (PlayerMove.section)
+        {
+            case "Top":
+                pointsIndex = Random.Range(0, walkPointsTop.Count);
+                agent.SetDestination(walkPointsTop[pointsIndex].position);
+                break;
+            case "Side":
+                pointsIndex = Random.Range(0, walkPointsSide.Count);
+                agent.SetDestination(walkPointsSide[pointsIndex].position);
+                break;
+            default:
+                pointsIndex = Random.Range(0, walkPointsBot.Count);
+                agent.SetDestination(walkPointsBot[pointsIndex].position);
+                break;
+        }
+    }
+
+    private void NextPointDifferentSectionPlayer()
+    {
+        switch (PlayerMove.section)
+        {
+            case "Top":
+                pointsIndex = Random.Range(0, walkPointsBot.Count);
+                agent.SetDestination(walkPointsBot[pointsIndex].position);
+                break;
+            case "Side":
+                pointsIndex = Random.Range(0, walkPointsBot.Count);
+                agent.SetDestination(walkPointsBot[pointsIndex].position);
+                break;
+            default:
+                if (Random.Range(0, 4) == 0)
+                {
+                    pointsIndex = Random.Range(0, walkPointsSide.Count);
+                    agent.SetDestination(walkPointsSide[pointsIndex].position);
+                }
+                else
+                {
+                    pointsIndex = Random.Range(0, walkPointsTop.Count);
+                    agent.SetDestination(walkPointsTop[pointsIndex].position);
+                }
+                break;
+        }
+    }
+
     private void NextPointNearPlayer()
     {
         Transform newPoint = walkPoints[0];
         foreach (Transform t in walkPoints)
         {
             if (Vector3.Distance(player.position, t.position) < Vector3.Distance(player.position, newPoint.position)
-                && t != walkPoints[pointsIndex])
+                && Vector3.Distance(t.position, walkPoints[pointsIndex].position) > 0.1f)
             {
                 newPoint = t;
             }
@@ -241,7 +283,7 @@ public class Monster : MonoBehaviour
         anim.SetInteger("State", 1);
         ChaseSpeed();
         //Debug.Log("Heard player!");
-        if (timeSinceGrowl > 4)
+        if (timeSinceGrowl > 2.5f)
         {
             timeSinceGrowl = 0;
             growl.Play();

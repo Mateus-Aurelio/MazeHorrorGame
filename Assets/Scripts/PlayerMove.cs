@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class PlayerMove : MonoBehaviour
 {
+    public static string section = "Bot";
     [SerializeField] private CharacterController controller;
     private float speed;
 
@@ -35,6 +36,7 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private Color backgroundHidden;
 
     [SerializeField] GameObject pauseMenu;
+    [SerializeField] AudioSource drone;
 
     private void Start()
     {
@@ -62,7 +64,7 @@ public class PlayerMove : MonoBehaviour
         {
             if (Input.GetAxis("Vertical") > 0)
             {
-                speed = Mathf.Lerp(speed, 8f, 0.04f);
+                speed = Mathf.Lerp(speed, 9.5f, 0.04f);
                 stamina -= Time.deltaTime * staminaLoseRate;
             }
             else
@@ -135,11 +137,13 @@ public class PlayerMove : MonoBehaviour
             if (Time.timeScale == 0)
             {
                 Time.timeScale = 1;
+                drone.volume = 0.2f;
                 pauseMenu.SetActive(false);
             }
             else
             {
                 Time.timeScale = 0;
+                drone.volume = 0.1f;
                 pauseMenu.SetActive(true);
             }
         }
